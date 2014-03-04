@@ -1,6 +1,7 @@
 'use strict';
 
 var path    = require('path')
+  , fs      = require('fs')
   , tar     = require('tar-stream')
   , zlib    = require('zlib')
   , through = require('through2')
@@ -138,16 +139,4 @@ exports.targz =
  */
 function targz(stream, opts) {
   return exports.tar(stream.pipe(zlib.createGunzip()), opts);
-}
-
-// Test
-var fs = require('fs');
-function inspect(obj, depth) {
-  console.error(require('util').inspect(obj, false, depth || 5, true));
-}
-
-if (!module.parent && typeof window === 'undefined') {
-  exports.tar(fs.createReadStream(__dirname + '/tmp/in.tar', 'utf8'), { strip: 1 })
-    .on('entry', inspect)
-    .pipe(process.stdout);
 }
