@@ -70,15 +70,18 @@ exports = module.exports =
  * The returned tar stream emits the following events on top of the typical `ReadableStream` events:
  *
  *  - `file` emitted whenever a file was processed and modified
+ *
+ * #### opts
+ *
+ *  - *{number=}*   **opts.strip**      `default: 0` sets the number of path segments to strip from each directory
+ *  - *{string=}*   **opts.content**    content of the Dockerfile, defaults to read(opts.dockerfile) or 'from ubuntu\n' 
+ *  - *{string=}*   **opts.dockerfile** file to read Dockerfile content from in case `opts.content` wasn't provided
+ *  - *{Object}*    **opts.stats**      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile
  * 
  * @name tar
  * @function
  * @param {ReadableStream} stream the original tar stream
- * @param {Object}    opts 
- * @param {number=0}  opts.strip      sets the number of path segments to strip from each directory
- * @param {string=}   opts.content    content of the Dockerfile, defaults to read(opts.dockerfile) or 'from ubuntu\n' 
- * @param {string=}   opts.dockerfile file to read Dockerfile content from in case `opts.content` wasn't provided
- * @param {Object}    opts.stats      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile
+ * @param {Object} opts @see above
  * @return {ReadableStream} the transformed tar stream
  */
 function tar(stream, opts) {
