@@ -72,8 +72,8 @@ exports = module.exports = function tar(stream, opts) {
 }
 exports.tar = exports;
 
-exports.targz = function targz(opts) {
-  return zlib.createGunzip().pipe(exports.tar(opts));
+exports.targz = function targz(stream, opts) {
+  return exports.tar(stream.pipe(zlib.createGunzip()), opts);
 }
 
 // Test
