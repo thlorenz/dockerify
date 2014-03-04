@@ -6,13 +6,16 @@ var test = require('tap').test
   , path = require('path')
   , tar = require('../')
   , fixtures = path.join(__dirname, 'fixtures')
-  , expected = path.join(__dirname, 'expected')
+  , expecteds = path.join(__dirname, 'expected')
 
 function inspect(obj, depth) {
   console.error(require('util').inspect(obj, false, depth || 5, true));
 }
 
-function check(desc, input, output, opts, expectedEntries, debug) {
+function check(desc, input, output, opts, expected, debug) {
+  expected = expected || {};
+  if (Array.isArray(expected)) expected = { entries: expected };
+
   test('\n' + desc, function (t) {
     var in_ = fs.createReadStream(path.join(fixtures, input), 'utf8');
 
@@ -20,6 +23,8 @@ function check(desc, input, output, opts, expectedEntries, debug) {
 
     var data = '';
     var entries = [];
+    var overriding = [];
+    var existing = [];
 
     opts             = opts || {}
     opts.stats       = opts.stats || {}
@@ -28,22 +33,27 @@ function check(desc, input, output, opts, expectedEntries, debug) {
     tar(in_, opts) 
       .on('error', function (err) { console.error(err); t.fail(err); t.end(); })
       .on('entry', [].push.bind(entries))
+      .on('overriding-dockerfile', [].push.bind(overriding))
+      .on('existing-dockerfile', [].push.bind(existing))
       .on('data', function (d) { data += d })
       .on('end', function () {
 
         entries.forEach(function (x) { delete x.mtime })
+        existing.forEach(function (x) { x.existing && delete x.existing.mtime; x.override && delete x.override.mtime; })
+        overriding.forEach(function (x) { x.existing && delete x.existing.mtime; x.override && delete x.override.mtime; })
 
         if (debug) {
-          inspect(entries);
-          fs.writeFileSync(path.join(expected, output), data, 'utf8');
+          inspect({ entries: entries, existing: existing, overriding: overriding });
+          fs.writeFileSync(path.join(expecteds, output), data, 'utf8');
           return t.end()
         }
 
-        expectedTar = fs.readFileSync(path.join(expected, output), 'utf8').toString();
+        expectedTar = fs.readFileSync(path.join(expecteds, output), 'utf8').toString();
         t.equal(data, expectedTar);
 
-        // some tests don't need to check entries
-        if (expectedEntries) t.deepEqual(entries, expectedEntries);
+        if (expected.entries) t.deepEqual(entries, expected.entries);
+        if (expected.existing) t.deepEqual(existing, expected.existing);
+        if (expected.overriding) t.deepEqual(overriding, expected.overriding);
 
         t.end();
       });
@@ -209,12 +219,217 @@ check(
   , { dockerfile: path.resolve(fixtures, 'Dockerfile') }
   , null
 )
-/*
+
+// uses default dockerfile since it the existing one is not at root
 check( 
-    'given a tar stream with a docker file and no override'
+    'given a tar stream with a docker file not at root and no override'
+  , 'with-dockerfile.tar'
+  , 'with-dockerfile-not-at-root-no-override.tar'
+  , { }
+  , { entries:
+      [ { name: './tmp/',
+          mode: 493,
+          uid: 502,
+          gid: 20,
+          size: 0,
+          type: 'directory',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: './tmp/Dockerfile',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 16,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: './tmp/hello1.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: './tmp/hello2.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'Dockerfile',
+          mode: 420,
+          uname: 'docker',
+          gname: 'users',
+          uid: 501,
+          gid: 20,
+          size: 12,
+          type: 'file' } ]
+    , existing:  [], overriding: [] }
+)
+
+// uses existing docker file
+check( 
+    'given a tar stream with a docker file at root and no override'
   , 'with-dockerfile.tar'
   , 'with-dockerfile-no-override.tar'
-  , { }
-  , null
-  , true
-)*/
+  , { strip: 1 }
+  , { entries:
+      [ { name: '.',
+          mode: 493,
+          uid: 502,
+          gid: 20,
+          size: 0,
+          type: 'directory',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'Dockerfile',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 16,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'hello1.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'hello2.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 } ],
+      existing:
+      [ { existing:
+            { name: 'Dockerfile',
+              mode: 420,
+              uid: 502,
+              gid: 20,
+              size: 16,
+              type: 'file',
+              linkname: null,
+              uname: 'thlorenz',
+              gname: 'staff',
+              devmajor: 0,
+              devminor: 0 } 
+      } ],
+      overriding: [] }
+)
+//
+// renaming existing docker file
+check( 
+    'given a tar stream with a docker file at root and override'
+  , 'with-dockerfile.tar'
+  , 'with-dockerfile-override.tar'
+  , { strip: 1, override: true, content: 'from docker/overriding' }
+  , { entries:
+      [ { name: '.',
+          mode: 493,
+          uid: 502,
+          gid: 20,
+          size: 0,
+          type: 'directory',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: '.Dockerfile.orig',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 16,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'hello1.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'hello2.txt',
+          mode: 420,
+          uid: 502,
+          gid: 20,
+          size: 10,
+          type: 'file',
+          linkname: null,
+          uname: 'thlorenz',
+          gname: 'staff',
+          devmajor: 0,
+          devminor: 0 },
+        { name: 'Dockerfile',
+          mode: 420,
+          uname: 'docker',
+          gname: 'users',
+          uid: 501,
+          gid: 20,
+          size: 22,
+          type: 'file' } ],
+      existing: [],
+      overriding:
+      [ { existing:
+            { name: '.Dockerfile.orig',
+              mode: 420,
+              uid: 502,
+              gid: 20,
+              size: 16,
+              type: 'file',
+              linkname: null,
+              uname: 'thlorenz',
+              gname: 'staff',
+              devmajor: 0,
+              devminor: 0 },
+          override:
+            { name: 'Dockerfile',
+              mode: 420,
+              uname: 'docker',
+              gname: 'users',
+              uid: 501,
+              gid: 20,
+              size: 22,
+              type: 'file' } } ] }
+)
