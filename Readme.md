@@ -36,13 +36,19 @@ The main purpose is adding a Dockerfile so the resulting tar stream can be piped
 <p>The returned tar stream emits the following events on top of the typical <code>ReadableStream</code> events:</p>
 <ul>
 <li><code>entry</code> emitted whenever an entry was processed and modified</li>
+<li><code>existing-dockerfile</code> emitted whenever an existing Dockerfile was found and used instead of the supplied one</li>
+<li><code>overriding-dockerfile</code> emitted whenever an exising Dockerfile was overridden with the supplied one</li>
 </ul>
 <h4>opts</h4>
 <ul>
 <li><em>{number=}</em>   <strong>opts.strip</strong>      <code>default: 0</code> sets the number of path segments to strip from each directory</li>
 <li><em>{string=}</em>   <strong>opts.content</strong>    content of the Dockerfile, defaults to read(opts.dockerfile) or 'from ubuntu\n' </li>
 <li><em>{string=}</em>   <strong>opts.dockerfile</strong> file to read Dockerfile content from in case <code>opts.content</code> wasn't provided</li>
-<li><em>{Object}</em>    <strong>opts.stats</strong>      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile</li>
+<li><p><em>{boolean=}</em>  <strong>opts.override</strong>   <code>default: false</code> if the project contains a <code>Dockerfile</code> at the root
+(after directories are stripped), it will be overwritten with the content/file provided if this option is set</p>
+</li>
+<li><p><em>{Object}</em>    <strong>opts.stats</strong>      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile</p>
+</li>
 </ul>
 </div>
 <h5>Parameters:</h5>
@@ -77,7 +83,7 @@ The main purpose is adding a Dockerfile so the resulting tar stream can be piped
 <li>
 <a href="https://github.com/thlorenz/dockerify/blob/master/index.js">index.js</a>
 <span>, </span>
-<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L63">lineno 63</a>
+<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L80">lineno 80</a>
 </li>
 </ul></dd>
 </dl>
@@ -133,7 +139,7 @@ Type
 <li>
 <a href="https://github.com/thlorenz/dockerify/blob/master/index.js">index.js</a>
 <span>, </span>
-<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L105">lineno 105</a>
+<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L131">lineno 131</a>
 </li>
 </ul></dd>
 </dl>

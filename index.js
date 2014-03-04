@@ -96,8 +96,8 @@ exports = module.exports =
  *  - *{string=}*   **opts.content**    content of the Dockerfile, defaults to read(opts.dockerfile) or 'from ubuntu\n' 
  *  - *{string=}*   **opts.dockerfile** file to read Dockerfile content from in case `opts.content` wasn't provided
  *  - *{boolean=}*  **opts.override**   `default: false` if the project contains a `Dockerfile` at the root 
- *                                      (after directories are stripped), it will be overwritten with the content/file provided
- *                                      if this option is set
+ *    (after directories are stripped), it will be overwritten with the content/file provided if this option is set
+ *
  *  - *{Object}*    **opts.stats**      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile
  * 
  * @name tar
