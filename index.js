@@ -9,8 +9,8 @@ var si = setImmediate || function (fn) { setTimeout(fn, 0) };
 
 function stripPathSegments(p, n) {
   var paths = p.split(path.sep);
-  if (paths.length <= n) throw new Error('Cannot strip more path segments than are paths in ' + p);
   paths = paths.filter(function (x) { return x.length &&  x !== '.' });
+  if (paths.length < n) throw new Error('Cannot strip more path segments than are paths in ' + p);
   return path.join.apply(path, paths.slice(n));
 }
 
@@ -76,6 +76,9 @@ exports = module.exports =
  *  - *{number=}*   **opts.strip**      `default: 0` sets the number of path segments to strip from each directory
  *  - *{string=}*   **opts.content**    content of the Dockerfile, defaults to read(opts.dockerfile) or 'from ubuntu\n' 
  *  - *{string=}*   **opts.dockerfile** file to read Dockerfile content from in case `opts.content` wasn't provided
+ *  - *{boolean=}*  **opts.override**   `default: false` if the project contains a `Dockerfile` at the root 
+ *                                      (after directories are stripped), it will be overwritten with the content/file provided
+ *                                      if this option is set
  *  - *{Object}*    **opts.stats**      allows setting mtime, mode, uname, gname, uid and gid of the created Dockefile
  * 
  * @name tar
