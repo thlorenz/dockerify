@@ -35,7 +35,7 @@ The main purpose is adding a Dockerfile so the resulting tar stream can be piped
 <h4>Note</h4>
 <p>The returned tar stream emits the following events on top of the typical <code>ReadableStream</code> events:</p>
 <ul>
-<li><code>file</code> emitted whenever a file was processed and modified</li>
+<li><code>entry</code> emitted whenever an entry was processed and modified</li>
 </ul>
 <h4>opts</h4>
 <ul>

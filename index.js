@@ -30,21 +30,21 @@ function dockerify(stream, dockerfile, opts, strip) {
       }
       var p = pack.entry(hdr, packstream, cb)
       if (hdr.type === 'file') packstream.pipe(p);
-      stream.emit('file', hdr);
+      stream.emit('entry', hdr);
     })
     .on('finish', function () {
-      var hdr = pack.entry(
-        { name  : 'Dockerfile'
+      var hdr = { 
+          name  : 'Dockerfile'
         , mtime : opts.mtime || new Date()
         , mode  : opts.mode  || parseInt('644', 8)
         , uname : opts.uname || 'docker'
         , gname : opts.gname || 'users'
         , uid   : opts.uid   || 501
         , gid   : opts.gid   || 20
-        }
-      , dockerfile);
+        };
+      pack.entry(hdr, dockerfile);
 
-      stream.emit('file', hdr);
+      stream.emit('entry', hdr);
       pack.finalize();
     });
 
@@ -69,7 +69,7 @@ exports = module.exports =
  *
  * The returned tar stream emits the following events on top of the typical `ReadableStream` events:
  *
- *  - `file` emitted whenever a file was processed and modified
+ *  - `entry` emitted whenever an entry was processed and modified
  *
  * #### opts
  *
@@ -93,7 +93,7 @@ function tar(stream, opts) {
   resolveContent(opts, function (err, content) {
     if (err) return out.emit('error', err);
     dockerify(stream, content, opts.stats, opts.strip).pipe(out);
-    stream.on('file', out.emit.bind(out, 'file'));
+    stream.on('entry', out.emit.bind(out, 'entry'));
   })
 
   return out;
@@ -123,6 +123,6 @@ function inspect(obj, depth) {
 
 if (!module.parent && typeof window === 'undefined') {
   exports.tar(fs.createReadStream(__dirname + '/tmp/in.tar', 'utf8'), { strip: 1 })
-    .on('file', inspect)
+    .on('entry', inspect)
     .pipe(process.stdout);
 }
