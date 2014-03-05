@@ -1,6 +1,6 @@
 # dockerify [![build status](https://secure.travis-ci.org/thlorenz/dockerify.png)](http://travis-ci.org/thlorenz/dockerify)
 
-Prepares any tarball containing a project so that a docker image can be built from i
+Prepares any tarball containing a project so that a docker image can be built from it
 
 ```js
 var fs = require('fs')
@@ -15,7 +15,12 @@ dockerify(intar, { strip: 1, dockerfile: __dirname + '/Dockerfile' })
 ### command line example
 
 ```
+# dockerify local file
 cat in.tar | dockerify -l silly -c 'from ubuntu' -s 1 > out.tar
+
+# dockerify github tarball
+curl -L https://github.com/thlorenz/browserify-markdown-editor/archive/010-finished-dev-version.tar.gz |\
+  dockerify -s 1 -c 'from dockerfile/nodejs\nadd . src\n' --gz > out.tar
 ```
 
 ## Installation
