@@ -3,12 +3,61 @@
 Prepares any tarball containing a project so that a docker image can be built from i
 
 ```js
-// TODO
+var fs = require('fs')
+  , dockerify = require('dockerify')
+
+var intar = fs.createReadStream(__dirname + '/in.tar', 'utf8');
+dockerify(intar, { strip: 1, dockerfile: __dirname + '/Dockerfile' })
+  .on('error', console.error)
+  .pipe(process.stdout)
+```
+
+### command line example
+
+```
+cat in.tar | dockerify -l silly -c 'from ubuntu' -s 1 > out.tar
 ```
 
 ## Installation
 
     npm install dockerify
+
+## Commandline Usage
+
+```
+dockerify <options> 
+
+   Creates a tarball stream into which a .tar or .tar.gz file can be piped in order to be dockerized 
+
+OPTIONS:
+
+  -l, --loglevel    level at which to log: silly|verbose|info|warn|error|silent -- default: verbose
+  
+  -h, --help        Print this help message.
+
+  -g, --gz          set this if you are piping a .tar.gz file
+
+  -s, --strip       default: 0, sets the number of path segments to strip from each directory  
+
+  -c, --content     content of the Dockerfile, defaults to reading --dockerfile or to 'from ubuntu\n'
+
+  -d, --dockerfile  file to read Dockerfile content from in case opts.content wasn't provided 
+
+  -o, --override    default: false if the project contains a Dockerfile at the root (after directories are stripped), 
+                    it will be overwritten with the content/file provided if this option is set
+
+
+EXAMPLES:
+  
+  dockerify a local tarball and strip outer directory, use default Dockerfile
+    
+    cat in.tar | dockerify -l silly -s 1 > out.tar
+
+  dockerify a .tar.gz file release on github, setting dockerfile content - Note --gz option
+
+    curl -L https://github.com/thlorenz/browserify-markdown-editor/archive/010-finished-dev-version.tar.gz |\
+      dockerify -s 1 -c 'from dockerfile/nodejs\nadd . src\n' --gz > out.tar
+```
 
 ## API
 

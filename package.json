@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Prepares any tarball containing a project so that a docker image can be built from it.",
   "main": "index.js",
+  "bin": {
+    "dockerify": "./bin/dockerify.js"
+  },
   "scripts": {
     "test": "tap test/*.js"
   },
@@ -12,13 +15,15 @@
   },
   "homepage": "https://github.com/thlorenz/dockerify",
   "dependencies": {
-    "through2": "^0.4.1",
-    "tar-stream": "^0.2.5"
+    "through2": "~0.4.1",
+    "tar-stream": "~0.2.5",
+    "npmlog": "~0.0.6",
+    "minimist": "~0.0.8"
   },
   "devDependencies": {
     "tap": "~0.4.3"
   },
-  "keywords": [],
+  "keywords": [ "docker", "tar", "stream", "transform", "inject", "Dockerfile" ],
   "author": {
     "name": "Thorsten Lorenz",
     "email": "thlorenz@gmx.de",
