@@ -19,7 +19,8 @@
     "minimist": "~0.0.8",
     "npmlog": "~0.0.6",
     "tar-stream": "~0.3.1",
-    "through2": "~0.4.1"
+    "through2": "~0.4.1",
+    "readable-stream": "~1.0.26-4"
   },
   "devDependencies": {
     "nave": "~0.4.5",
