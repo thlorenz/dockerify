@@ -137,7 +137,7 @@ The main purpose is adding a Dockerfile so the resulting tar stream can be piped
 <li>
 <a href="https://github.com/thlorenz/dockerify/blob/master/index.js">index.js</a>
 <span>, </span>
-<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L80">lineno 80</a>
+<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L81">lineno 80</a>
 </li>
 </ul></dd>
 </dl>
@@ -193,7 +193,7 @@ Type
 <li>
 <a href="https://github.com/thlorenz/dockerify/blob/master/index.js">index.js</a>
 <span>, </span>
-<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L131">lineno 131</a>
+<a href="https://github.com/thlorenz/dockerify/blob/master/index.js#L132">lineno 131</a>
 </li>
 </ul></dd>
 </dl>
