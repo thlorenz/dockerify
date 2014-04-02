@@ -1,6 +1,7 @@
 'use strict';
 
 var path    = require('path')
+  , PassThrough = require('readable-stream/passthrough')
   , fs      = require('fs')
   , tar     = require('tar-stream')
   , zlib    = require('zlib')
@@ -111,6 +112,7 @@ function tar(stream, opts) {
   opts.stats = opts.stats || {};
 
   var out = through();
+  stream = stream.pipe(new PassThrough());	
 
   resolveContent(opts, function (err, content) {
     if (err) return out.emit('error', err);
