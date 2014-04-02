@@ -1,11 +1,11 @@
 'use strict';
 
-var path    = require('path')
-  , PassThrough = require('readable-stream/passthrough')
-  , fs      = require('fs')
-  , tar     = require('tar-stream')
-  , zlib    = require('zlib')
-  , through = require('through2')
+var path        = require('path')
+  , PassThrough = require('readable-stream').PassThrough
+  , fs          = require('fs')
+  , tar         = require('tar-stream')
+  , zlib        = require('zlib')
+  , through     = require('through2')
 
 var si = typeof setImmediate === 'function' ? setImmediate : function (fn) { setTimeout(fn, 0) };
 
