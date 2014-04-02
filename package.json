@@ -18,7 +18,7 @@
   "dependencies": {
     "minimist": "~0.0.8",
     "npmlog": "~0.0.6",
-    "tar-stream": "git://github.com/thlorenz/tar-stream#fix-readable-stream-dep",
+    "tar-stream": "~0.3.1",
     "through2": "~0.4.1"
   },
   "devDependencies": {
