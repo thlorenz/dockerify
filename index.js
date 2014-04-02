@@ -6,7 +6,7 @@ var path    = require('path')
   , zlib    = require('zlib')
   , through = require('through2')
 
-var si = setImmediate || function (fn) { setTimeout(fn, 0) };
+var si = typeof setImmediate === 'function' ? setImmediate : function (fn) { setTimeout(fn, 0) };
 
 function stripPathSegments(p, n) {
   var paths = p.split(path.sep);
