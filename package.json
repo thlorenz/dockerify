@@ -7,7 +7,8 @@
     "dockerify": "./bin/dockerify.js"
   },
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "set -e; for t in test/*.js; do node $t; done;",
+    "test-0.8": "nave use 0.8 npm test"
   },
   "repository": {
     "type": "git",
@@ -15,12 +16,13 @@
   },
   "homepage": "https://github.com/thlorenz/dockerify",
   "dependencies": {
-    "through2": "~0.4.1",
-    "tar-stream": "~0.2.5",
+    "minimist": "~0.0.8",
     "npmlog": "~0.0.6",
-    "minimist": "~0.0.8"
+    "tar-stream": "git://github.com/thlorenz/tar-stream#fix-readable-stream-dep",
+    "through2": "~0.4.1"
   },
   "devDependencies": {
+    "nave": "~0.4.5",
     "tap": "~0.4.3"
   },
   "keywords": [
@@ -41,6 +43,6 @@
     "url": "https://github.com/thlorenz/dockerify/blob/master/LICENSE"
   },
   "engine": {
-    "node": ">=0.8"
+    "node": ">=0.10"
   }
 }
