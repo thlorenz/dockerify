@@ -1,6 +1,6 @@
 {
   "name": "dockerify",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Prepares any tarball containing a project so that a docker image can be built from it.",
   "main": "index.js",
   "bin": {
