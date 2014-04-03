@@ -34,7 +34,8 @@ function check(desc, input, output, opts, expected, debug) {
     opts.stats       = opts.stats || {}
     opts.stats.mtime = new Date(11111) // needs to be consistent to have stable tests
 
-    tar(in_, opts) 
+    in_
+      .pipe(tar(opts))
       .on('error', function (err) { console.error(err); t.fail(err); t.end(); })
       .on('entry', [].push.bind(entries))
       .on('overriding-dockerfile', [].push.bind(overriding))
@@ -55,7 +56,7 @@ function check(desc, input, output, opts, expected, debug) {
 
         if (debug) {
           inspect({ entries: entries, existing: existing, overriding: overriding });
-          fs.writeFileSync(path.join(expecteds, output), data, 'utf8');
+          fs.writeFileSync(path.join(expecteds, output + '.n.tar'), data, 'utf8');
           return t.end()
         }
 
@@ -122,6 +123,7 @@ check(
         size: 12,
         type: 'file' } ]
 )
+
 check( 
     'given a tar stream without a docker file strip 1'
   , 'no-dockerfile.tar'

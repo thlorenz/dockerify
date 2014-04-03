@@ -1,80 +1,11 @@
 'use strict';
 
-var path        = require('path')
-  , PassThrough = require('readable-stream').PassThrough
-  , fs          = require('fs')
-  , tar         = require('tar-stream')
-  , zlib        = require('zlib')
-  , through     = require('through2')
+var path              = require('path')
+  , dockerifyReadable = require('./dockerify-readable')
+  , fs                = require('fs')
+  , zlib              = require('zlib')
+  , through           = require('through2')
 
-var si = typeof setImmediate === 'function' ? setImmediate : function (fn) { setTimeout(fn, 0) };
-
-function stripPathSegments(p, n) {
-  var paths = p.split(path.sep);
-  paths = paths.filter(function (x) { return x.length &&  x !== '.' });
-  if (paths.length < n) throw new Error('Cannot strip more path segments than are paths in ' + p);
-  return path.join.apply(path, paths.slice(n));
-}
-
-function dockerify(stream, dockerfile, opts, strip, override) {
-  var pack    = tar.pack()
-    , extract = tar.extract()
-    , existingDockerfile = false;
-
-  extract
-    .on('error', stream.emit.bind(stream, 'error'))
-    .on('entry', function (hdr, packstream, cb) {
-      if (strip) {
-        try {
-          hdr.name = stripPathSegments(hdr.name, strip);
-        } catch (err) {
-          stream.emit('error', err);
-        }
-      }
-      if (hdr.name === 'Dockerfile') {
-        existingDockerfile = hdr;
-        // rename this Dockerfile if we'll override it later
-        if (override) hdr.name = '.Dockerfile.orig';
-      }
-
-      var p = pack.entry(hdr, packstream, cb)
-      if (hdr.type === 'file') packstream.pipe(p);
-      stream.emit('entry', hdr);
-    })
-    .on('finish', function () {
-      var hdr;
-      if (!existingDockerfile || override) {
-        hdr = { 
-            name  : 'Dockerfile'
-          , mtime : opts.mtime || new Date()
-          , mode  : opts.mode  || parseInt('644', 8)
-          , uname : opts.uname || 'docker'
-          , gname : opts.gname || 'users'
-          , uid   : opts.uid   || 501
-          , gid   : opts.gid   || 20
-          };
-        pack.entry(hdr, dockerfile);
-
-        stream.emit('entry', hdr);
-
-        // a docker file existed, but we chose to override it
-        if (existingDockerfile) stream.emit('overriding-dockerfile', { existing: existingDockerfile, override: hdr });
-      } else {
-        // a dockerfile existed and we chose not to override it
-        if (existingDockerfile) stream.emit('existing-dockerfile', { existing: existingDockerfile });
-      }
-      pack.finalize();
-    });
-
-  stream.pipe(extract);
-  return pack;
-}
-
-function resolveContent(opts, cb) {
-  if (opts.content) return si(cb.bind(null, null, opts.content));
-  if (opts.dockerfile) return fs.readFile(opts.dockerfile, 'utf8', cb);
-  si(cb.bind(null, null, 'from ubuntu\n'));
-}
 
 exports = module.exports = 
 
@@ -103,28 +34,14 @@ exports = module.exports =
  * 
  * @name tar
  * @function
- * @param {ReadableStream} stream the original tar stream
  * @param {Object} opts @see above
- * @return {ReadableStream} the transformed tar stream
+ * @return {TranformStream} that will transform a tar stream that is piped into it
  */
-function tar(stream, opts) {
+function tar(opts) {
   opts = opts || {};
   opts.stats = opts.stats || {};
 
-  var out = through();
-  stream = stream.pipe(new PassThrough());	
-
-  resolveContent(opts, function (err, content) {
-    if (err) return out.emit('error', err);
-
-    [ 'error', 'entry', 'existing-dockerfile', 'overriding-dockerfile' ]
-      .forEach(function (x) { stream.on(x, out.emit.bind(out, x)) });
-
-    dockerify(stream, content, opts.stats, opts.strip, opts.override).pipe(out);
-
-  })
-
-  return out;
+  return dockerifyReadable(opts);
 }
 exports.tar = exports;
 
@@ -139,6 +56,6 @@ exports.targz =
  * @param {Object} opts @see `tar`
  * @return {ReadableStream} the transformed tar stream
  */
-function targz(stream, opts) {
-  return exports.tar(stream.pipe(zlib.createGunzip()), opts);
+function targz(opts) {
+  return zlib.createGunzip().pipe(exports.tar(opts));
 }
